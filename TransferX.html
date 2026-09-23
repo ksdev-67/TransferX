@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07152f" />
+  <meta name="description" content="Transfer X — secure QR-paired image transfer by KS." />
+  <title>Transfer X — KS</title>
+
+  <!-- Professional fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#050b18;
+      --panel:#0a1630;
+      --panel2:#0d1d3d;
+      --line:rgba(255,255,255,.09);
+      --text:#f4f7ff;
+      --muted:#8ea3c7;
+      --accent:#3c93ff;
+      --accent2:#6ab0ff;
+      --good:#3ee08b;
+      --danger:#ff5f78;
+      --warning:#ffbf5f;
+      --shadow:0 20px 70px rgba(0,0,0,.38);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:
+      radial-gradient(900px 500px at 85% -10%,rgba(60,147,255,.16),transparent 55%),
+      radial-gradient(700px 500px at -10% 20%,rgba(86,108,255,.10),transparent 55%),
+      var(--bg);
+      color:var(--text);font-family:Inter,system-ui,sans-serif;
+    }
+    body{overflow-x:hidden}
+    button,input{font:inherit}
+    button{border:0;cursor:pointer}
+    a{color:inherit}
+
+    .app-shell{width:min(1240px,100%);margin:0 auto;padding:24px 18px 40px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:13px}
+    .brand-mark{
+      width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
+      background:linear-gradient(145deg,#2c87ff,#123c94);
+      box-shadow:0 10px 32px rgba(44,135,255,.24);
+      font:700 20px "Space Grotesk",sans-serif;
+      letter-spacing:-1px
+    }
+    .brand h1{font:700 22px "Space Grotesk",sans-serif;margin:0}
+    .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .pill{
+      padding:9px 12px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+      border-radius:999px;color:#dce7fb;font-size:12px
+    }
+
+    .btn{
+      min-height:44px;padding:0 16px;border-radius:14px;color:var(--text);
+      background:rgba(255,255,255,.06);border:1px solid var(--line);
+      transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.09)}
+    .btn:active{transform:translateY(0) scale(.985)}
+    .btn.primary{background:linear-gradient(135deg,#3d99ff,#2469e8);border-color:transparent;box-shadow:0 12px 28px rgba(36,105,232,.22)}
+    .btn.danger{background:rgba(255,95,120,.10);border-color:rgba(255,95,120,.28);color:#ff9bad}
+    .btn.small{min-height:38px;padding:0 12px;border-radius:12px;font-size:13px}
+
+    .view{display:none}
+    .view.active{display:block;animation:viewIn .35s ease}
+    @keyframes viewIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+    .card{
+      border:1px solid var(--line);border-radius:var(--radius);
+      background:linear-gradient(180deg,rgba(15,32,65,.94),rgba(7,17,35,.96));
+      box-shadow:var(--shadow);backdrop-filter:blur(18px)
+    }
+    .hero{padding:30px;overflow:hidden;position:relative}
+    .hero:before{
+      content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-100px;top:-130px;
+      background:rgba(55,144,255,.15);filter:blur(1px)
+    }
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;color:#cfe0ff;font-size:12px;padding:7px 10px;border-radius:999px;border:1px solid rgba(106,176,255,.22);background:rgba(60,147,255,.08)}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 14px rgba(62,224,139,.6)}
+    .hero h2{font:700 clamp(34px,5vw,62px)/.96 "Space Grotesk",sans-serif;letter-spacing:-3px;margin:22px 0 16px;max-width:600px}
+    .hero h2 span{background:linear-gradient(90deg,#fff,#72b6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero-copy{max-width:660px;color:#a9b9d4;line-height:1.7;margin:0}
+    .feature-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}
+    .feature{
+      padding:15px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.035)
+    }
+    .feature strong{display:block;font-size:13px;margin-bottom:5px}
+    .feature span{display:block;color:var(--muted);font-size:11px;line-height:1.45}
+
+    .pair-card{padding:24px;display:flex;flex-direction:column;justify-content:center;min-height:100%}
+    .pair-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .pair-head h3{margin:0;font:600 20px "Space Grotesk",sans-serif}
+    .pair-head p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .qr-wrap{display:grid;place-items:center;margin:24px 0}
+    .qr-box{
+      padding:16px;border-radius:24px;background:white;box-shadow:0 20px 50px rgba(0,0,0,.34);
+      min-width:256px;min-height:256px;display:grid;place-items:center
+    }
+    #qrCode img{width:224px;height:224px;display:block}
+    .pair-id{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.16)
+    }
+    .pair-id .id-label{font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
+    .pair-id code{font-size:12px;color:#d6e5ff;word-break:break-all}
+    .instructions{margin-top:15px;display:grid;gap:9px}
+    .instruction{
+      display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.035);color:#b9c8df;font-size:12px;line-height:1.5
+    }
+    .step{width:23px;height:23px;border-radius:8px;background:rgba(60,147,255,.12);display:grid;place-items:center;color:#72b6ff;font-weight:700;flex:0 0 auto}
+
+    .workspace{margin-top:18px}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px;margin-bottom:14px}
+    .toolbar-left{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+    .status{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#c5d3e9}
+    .status .dot{width:6px;height:6px}
+    .stats{display:flex;gap:8px;flex-wrap:wrap}
+    .stat{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:#a6b7d2;font-size:11px}
+
+    .upload-zone{
+      padding:24px;border:1px dashed rgba(106,176,255,.3);border-radius:20px;
+      background:linear-gradient(180deg,rgba(60,147,255,.07),rgba(255,255,255,.02));
+      transition:border-color .2s ease,background .2s ease,transform .2s ease
+    }
+    .upload-zone.drag{border-color:var(--accent2);background:rgba(60,147,255,.12);transform:scale(1.005)}
+    .upload-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .upload-title{font:600 17px "Space Grotesk",sans-serif;margin:0 0 5px}
+    .upload-sub{color:var(--muted);font-size:12px;line-height:1.5;margin:0}
+    .upload-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+    .gallery-card{padding:18px;margin-top:14px}
+    .gallery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+    .gallery-head h3{font:600 17px "Space Grotesk",sans-serif;margin:0}
+    .gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .empty{
+      grid-column:1/-1;min-height:220px;display:grid;place-items:center;text-align:center;
+      border:1px dashed var(--line);border-radius:18px;color:var(--muted);padding:24px
+    }
+    .empty strong{display:block;color:#d9e5fa;font-size:15px;margin-bottom:7px}
+    .empty span{display:block;font-size:12px;max-width:420px;line-height:1.6}
+
+    .image-card{position:relative;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#071126;aspect-ratio:1/1}
+    .image-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+    .image-card:hover img{transform:scale(1.035)}
+    .image-card .shade{position:absolute;inset:auto 0 0;height:72px;background:linear-gradient(transparent,rgba(0,0,0,.86))}
+    .image-meta{position:absolute;left:10px;right:10px;bottom:9px;display:flex;align-items:end;justify-content:space-between;gap:10px}
+    .image-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+    .image-time{font-size:9px;color:#9fb0ca}
+    .image-actions{position:absolute;top:9px;right:9px;display:flex;gap:6px;opacity:0;transform:translateY(-4px);transition:.2s ease}
+    .image-card:hover .image-actions,.image-card:focus-within .image-actions{opacity:1;transform:none}
+    .icon-btn{width:34px;height:34px;border-radius:10px;background:rgba(5,11,24,.74);border:1px solid rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;backdrop-filter:blur(7px)}
+    .icon-btn:hover{background:rgba(60,147,255,.85)}
+    .progress-wrap{margin-top:13px;display:none}
+    .progress-wrap.active{display:block;animation:viewIn .25s ease}
+    .progress-line{height:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.07)}
+    .progress-bar{height:100%;width:0;background:linear-gradient(90deg,#3c93ff,#74b8ff);transition:width .15s ease}
+    .progress-text{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted);margin-top:7px}
+
+    .scanner-card{max-width:760px;margin:0 auto;padding:24px}
+    .scanner-head h2{font:700 30px "Space Grotesk",sans-serif;margin:0 0 6px}
+    .scanner-head p{color:var(--muted);margin:0;line-height:1.6;font-size:13px}
+    #reader{margin-top:22px;border-radius:20px;overflow:hidden;background:#020711;border:1px solid var(--line)}
+    #reader video{width:100%!important;border-radius:20px}
+    .scanner-actions{display:flex;justify-content:space-between;gap:10px;margin-top:15px;flex-wrap:wrap}
+    .manual{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}
+    .manual p{font-size:11px;color:var(--muted);margin:0 0 8px}
+    .manual-row{display:flex;gap:8px}
+    .input{
+      width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.045);color:#fff;padding:0 12px;outline:none
+    }
+    .input:focus{border-color:rgba(106,176,255,.52);box-shadow:0 0 0 4px rgba(60,147,255,.08)}
+
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(9px);z-index:50}
+    .modal.open{display:flex;animation:fade .2s ease}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+    .modal-panel{width:min(1080px,100%);max-height:92vh;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:#071126;box-shadow:0 30px 100px rgba(0,0,0,.55)}
+    .modal-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);gap:10px}
+    .modal-top h3{font:600 15px "Space Grotesk",sans-serif;margin:0;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .zoom-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+    .viewer{display:grid;place-items:center;min-height:360px;max-height:72vh;overflow:auto;background:
+      linear-gradient(45deg,#071126 25%,#091632 25%,#091632 50%,#071126 50%,#071126 75%,#091632 75%);
+      background-size:28px 28px;padding:40px
+    }
+    .viewer img{max-width:none;max-height:none;transform-origin:center center;transition:transform .16s ease;display:block;box-shadow:0 25px 70px rgba(0,0,0,.42)}
+    .modal-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+    .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(6,14,30,.94);color:#eff5ff;box-shadow:0 18px 50px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.25s ease;z-index:100;font-size:12px}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast.good{border-color:rgba(62,224,139,.24)}
+    .toast.bad{border-color:rgba(255,95,120,.24)}
+
+    .footer{padding:25px 8px 0;text-align:center;color:#637998;font-size:11px}
+    .footer strong{color:#9bb0cf}
+    .hidden{display:none!important}
+    .desktop-only{display:block}
+    .mobile-only{display:none}
+    body.mobile-mode .desktop-only{display:none!important}
+    body.mobile-mode .mobile-only{display:block}
+    body.desktop-mode .mobile-only{display:none!important}
+    .shake{animation:shake .34s ease}
+    @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+    @media (max-width: 960px){
+      .hero-grid{grid-template-columns:1fr}
+      .pair-card{min-height:auto}
+      .gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media (max-width: 680px){
+      .app-shell{padding:15px 12px 28px}
+      .topbar{align-items:flex-start}
+      .brand h1{font-size:19px}
+      .top-actions{flex-direction:column;align-items:flex-end}
+      .hero{padding:22px}
+      .pair-card{padding:18px}
+      .hero h2{font-size:44px;letter-spacing:-2px}
+      .feature-row{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .upload-inner{flex-direction:column;align-items:flex-start}
+      .upload-actions{justify-content:flex-start}
+      .manual-row{flex-direction:column}
+      .modal-top h3{max-width:100%}
+      .zoom-controls{display:none}
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">TX</div>
+        <div>
+          <h1>Transfer X</h1>
+          <p>By KS · Developed By Kaviru Sadil</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill" id="connectionPill">Detecting device…</span>
+        <button class="btn danger small hidden" id="logoutBtn">LOG ID OUT</button>
+      </div>
+    </header>
+
+    <!-- FIRST-TIME / PAIRING VIEW -->
+    <section class="view active desktop-only" id="pairView">
+      <div class="hero-grid">
+        <div class="card hero">
+          <span class="eyebrow"><span class="dot"></span> QR-PAIRED PRIVATE TRANSFER</span>
+          <h2>Move images between <span>desktop & mobile.</span></h2>
+          <p class="hero-copy">
+            Create one private Transfer X ID on the desktop, scan it from your mobile device,
+            and both devices share the same encrypted image room. No account login is required.
+          </p>
+          <div class="feature-row">
+            <div class="feature"><strong>QR Pairing</strong><span>One scan links a device to the same transfer room.</span></div>
+            <div class="feature"><strong>Firestore Only</strong><span>Images are stored as encrypted chunks in Firestore, not Firebase Storage.</span></div>
+            <div class="feature"><strong>Local Key</strong><span>The encryption key stays in the paired browser's local storage.</span></div>
+          </div>
+        </div>
+
+        <div class="card pair-card">
+          <div class="pair-head">
+            <div>
+              <h3>Desktop Pairing QR</h3>
+              <p>Keep this page open and scan this QR from your mobile site.</p>
+            </div>
+            <span class="pill">NO LOGIN</span>
+          </div>
+
+          <div class="qr-wrap">
+            <div class="qr-box"><div id="qrCode"></div></div>
+          </div>
+
+          <div class="pair-id">
+            <div>
+              <div class="id-label">Transfer X ID</div>
+              <code id="roomIdText">Creating secure ID…</code>
+            </div>
+            <button class="btn small" id="copyIdBtn">COPY</button>
+          </div>
+
+          <div class="instructions">
+            <div class="instruction"><span class="step">1</span><span>Open Transfer X on your phone and choose <strong>SCAN QR</strong>.</span></div>
+            <div class="instruction"><span class="step">2</span><span>Allow camera access and scan the QR shown above.</span></div>
+            <div class="instruction"><span class="step">3</span><span>After pairing, both devices automatically show the same image gallery.</span></div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn primary" id="continueDesktopBtn">OPEN TRANSFER X</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCANNER VIEW -->
+    <section class="view mobile-only" id="scannerView">
+      <div class="card scanner-card">
+        <div class="scanner-head">
+          <h2>Scan Transfer X QR</h2>
+          <p>Scan the QR displayed on the desktop. The pairing secret is contained inside the QR and is never stored as readable text in Firestore.</p>
+        </div>
+        <div id="reader"></div>
+        <div class="scanner-actions">
+          <button class="btn" id="stopScannerBtn">STOP SCANNER</button>
+          <button class="btn" id="backPairBtn">BACK</button>
+        </div>
+        <div class="manual">
+          <p>Having camera trouble? You can paste a Transfer X pairing string manually.</p>
+          <div class="manual-row">
+            <input class="input" id="manualPairInput" placeholder="TX1:..." autocomplete="off" />
+            <button class="btn primary" id="manualPairBtn">CONNECT</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKSPACE -->
+    <section class="view" id="workspaceView">
+      <div class="card toolbar">
+        <div class="toolbar-left">
+          <div class="status"><span class="dot"></span><span id="statusText">Secure room connected</span></div>
+          <div class="stats">
+            <span class="stat" id="deviceStat">Paired device</span>
+            <span class="stat" id="imageStat">0 images</span>
+          </div>
+        </div>
+        <button class="btn small" id="pairAnotherBtn">PAIR ANOTHER DEVICE</button>
+      </div>
+
+      <div class="card workspace" style="padding:14px">
+        <div class="upload-zone" id="dropZone">
+          <div class="upload-inner">
+            <div>
+              <p class="upload-title">Transfer Images</p>
+              <p class="upload-sub">Choose photos, drag them here, or use your camera. Images are converted to Data URLs, encrypted in your browser, and uploaded to Firestore in small chunks.</p>
+            </div>
+            <div class="upload-actions">
+              <input id="imageInput" class="hidden" type="file" accept="image/*" multiple />
+              <input id="cameraInput" class="hidden" type="file" accept="image/*" capture="environment" />
+              <button class="btn primary" id="chooseImagesBtn">SELECT IMAGES</button>
+              <button class="btn" id="cameraBtn">CAMERA</button>
+            </div>
+          </div>
+
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-line"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-text"><span id="progressLabel">Preparing…</span><span id="progressPercent">0%</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <div class="gallery-head">
+            <h3>Shared Images</h3>
+            <span class="pill" id="syncLabel">LIVE SYNC</span>
+          </div>
+          <div class="gallery-grid" id="galleryGrid">
+            <div class="empty">
+              <div>
+                <strong>No images yet</strong>
+                <span>Upload an image from this device or another paired device. New images will appear here automatically.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <strong>Transfer X</strong> · Secure QR-Paired Image Transfer · By KS · Developed By Kaviru Sadil · &copy; 2026 - KS TransferX
+    </footer>
+  </main>
+
+  <!-- Viewer -->
+  <div class="modal" id="viewerModal">
+    <div class="modal-panel">
+      <div class="modal-top">
+        <h3 id="viewerTitle">Image</h3>
+        <div class="zoom-controls">
+          <button class="btn small" id="zoomOutBtn">−</button>
+          <button class="btn small" id="zoomResetBtn">RESET</button>
+          <button class="btn small" id="zoomInBtn">+</button>
+          <button class="btn small" id="viewerDownloadBtn">DOWNLOAD</button>
+          <button class="btn small" id="viewerCloseBtn">CLOSE</button>
+        </div>
+      </div>
+      <div class="viewer" id="viewerCanvas">
+        <img id="viewerImage" alt="Transfer X preview" />
+      </div>
+      <div class="modal-bottom">
+        <span id="viewerInfo">Zoom with + / − or mouse wheel.</span>
+        <span>Client-side encrypted room</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    /*
+      ================================================================
+      TRANSFER X — FIREBASE SETUP
+      ================================================================
+      Paste your Firebase web config below.
+      This version uses the current Firebase modular browser CDN style.
+      No Firebase Authentication is required by this front-end.
+
+      Important:
+      Firestore does NOT have a built-in "password-like" security rule
+      that can validate AES keys. The room ID + QR secret therefore acts
+      as a bearer pairing credential for the encrypted client-side data.
+      The data stored in Firestore is ciphertext, but an attacker who
+      discovers the room path could still potentially alter/delete it.
+      For production, add Firebase App Check and restrictive rules,
+      while keeping the QR secret out of Firestore.
+    */
+
+    // Firebase modules are loaded dynamically so the QR/ID UI still works
+    // even before Firebase configuration is added or if Firebase loads slowly.
+    let initializeApp, getFirestore, collection, doc, setDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp;
+
+    let firebaseModulesPromise = null;
+    async function loadFirebaseModules(){
+      if(firebaseModulesPromise) return firebaseModulesPromise;
+      firebaseModulesPromise = Promise.all([
+        import("https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")
+      ]).then(([appMod, fsMod]) => {
+        initializeApp = appMod.initializeApp;
+        ({getFirestore, collection, doc, setDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp} = fsMod);
+        return true;
+      });
+      return firebaseModulesPromise;
+    }
+
+    function loadScript(src, globalName, timeout=9000){
+      if(window[globalName]) return Promise.resolve(window[globalName]);
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[data-transferx-src=\"${src}\"]`);
+        const script = existing || document.createElement("script");
+        let done = false;
+        const timer = setTimeout(() => {
+          if(done) return;
+          done = true;
+          reject(new Error(`Could not load ${globalName}.`));
+        }, timeout);
+        script.onload = () => {
+          if(done) return;
+          clearTimeout(timer);
+          done = true;
+          if(window[globalName]) resolve(window[globalName]);
+          else reject(new Error(`${globalName} loaded but was not found.`));
+        };
+        script.onerror = () => {
+          if(done) return;
+          clearTimeout(timer);
+          done = true;
+          reject(new Error(`Could not load ${globalName}.`));
+        };
+        if(!existing){
+          script.src = src;
+          script.async = true;
+          script.dataset.transferxSrc = src;
+          document.head.appendChild(script);
+        }
+      });
+    }
+
+    let qrReadyPromise = null;
+    function ensureQrLibrary(){
+      if(qrReadyPromise) return qrReadyPromise;
+      qrReadyPromise = loadScript(
+        "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
+        "QRCode"
+      );
+      return qrReadyPromise;
+    }
+
+    let scannerReadyPromise = null;
+    function ensureScannerLibrary(){
+      if(scannerReadyPromise) return scannerReadyPromise;
+      scannerReadyPromise = loadScript(
+        "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",
+        "Html5Qrcode"
+      );
+      return scannerReadyPromise;
+    }
+
+    // =========================
+    // PASTE YOUR FIREBASE CONFIG
+    // =========================
+    const FIREBASE_CONFIG = {
+      apiKey: "PASTE_YOUR_API_KEY",
+      authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+      appId: "PASTE_YOUR_APP_ID"
+    };
+
+    const APP_ID = "transfer-x";
+    const ROOM_PREFIX = "transferXRooms";
+    const FILES_COLLECTION = "files";
+
+    /*
+      Firestore structure:
+
+      transferXRooms/{ROOM_ID}
+        - version
+        - createdAt
+
+      transferXRooms/{ROOM_ID}/files/{FILE_ID}
+        - encryptedMeta
+        - chunkCount
+        - iv
+        - createdAt
+
+      transferXRooms/{ROOM_ID}/files/{FILE_ID}/chunks/{CHUNK_INDEX}
+        - i
+        - data
+
+      NOTE: The image Data URL is encrypted first, then Base64 encoded
+      and split into Firestore-sized chunks.
+    */
+
+    const state = {
+      roomId: null,
+      secret: null,
+      key: null,
+      unsubscribe: null,
+      scanner: null,
+      items: new Map(),
+      objectUrls: new Map(),
+      viewerItem: null,
+      viewerScale: 1
+    };
+
+    const els = {
+      pairView: document.getElementById("pairView"),
+      scannerView: document.getElementById("scannerView"),
+      workspaceView: document.getElementById("workspaceView"),
+      roomIdText: document.getElementById("roomIdText"),
+      qrCode: document.getElementById("qrCode"),
+      connectionPill: document.getElementById("connectionPill"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      continueDesktopBtn: document.getElementById("continueDesktopBtn"),
+      stopScannerBtn: document.getElementById("stopScannerBtn"),
+      backPairBtn: document.getElementById("backPairBtn"),
+      manualPairInput: document.getElementById("manualPairInput"),
+      manualPairBtn: document.getElementById("manualPairBtn"),
+      pairAnotherBtn: document.getElementById("pairAnotherBtn"),
+      copyIdBtn: document.getElementById("copyIdBtn"),
+      imageInput: document.getElementById("imageInput"),
+      cameraInput: document.getElementById("cameraInput"),
+      chooseImagesBtn: document.getElementById("chooseImagesBtn"),
+      cameraBtn: document.getElementById("cameraBtn"),
+      dropZone: document.getElementById("dropZone"),
+      progressWrap: document.getElementById("progressWrap"),
+      progressBar: document.getElementById("progressBar"),
+      progressLabel: document.getElementById("progressLabel"),
+      progressPercent: document.getElementById("progressPercent"),
+      galleryGrid: document.getElementById("galleryGrid"),
+      imageStat: document.getElementById("imageStat"),
+      deviceStat: document.getElementById("deviceStat"),
+      statusText: document.getElementById("statusText"),
+      syncLabel: document.getElementById("syncLabel"),
+      toast: document.getElementById("toast"),
+      viewerModal: document.getElementById("viewerModal"),
+      viewerImage: document.getElementById("viewerImage"),
+      viewerTitle: document.getElementById("viewerTitle"),
+      viewerInfo: document.getElementById("viewerInfo"),
+      viewerCanvas: document.getElementById("viewerCanvas"),
+      viewerDownloadBtn: document.getElementById("viewerDownloadBtn"),
+      viewerCloseBtn: document.getElementById("viewerCloseBtn"),
+      zoomInBtn: document.getElementById("zoomInBtn"),
+      zoomOutBtn: document.getElementById("zoomOutBtn"),
+      zoomResetBtn: document.getElementById("zoomResetBtn")
+    };
+
+    // ---------- Utilities ----------
+    function byId(id){ return document.getElementById(id); }
+
+    function isFirebaseConfigured(){
+      return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith("PASTE_")
+        && FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.startsWith("PASTE_");
+    }
+
+    function showView(which){
+      [els.pairView, els.scannerView, els.workspaceView].forEach(v => v.classList.remove("active"));
+      which.classList.add("active");
+    }
+
+    let toastTimer = null;
+    function toast(message, type=""){
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.className = "toast show " + type;
+      toastTimer = setTimeout(() => els.toast.className = "toast", 2800);
+    }
+
+    function randomBytes(length){
+      const bytes = new Uint8Array(length);
+      crypto.getRandomValues(bytes);
+      return bytes;
+    }
+
+    function bytesToB64(bytes){
+      let bin = "";
+      const chunk = 0x8000;
+      for(let i=0;i<bytes.length;i+=chunk){
+        bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      return btoa(bin);
+    }
+
+    function b64ToBytes(str){
+      const bin = atob(str);
+      const out = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    function bytesToB64Url(bytes){
+      return bytesToB64(bytes).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    }
+
+    function b64UrlToBytes(str){
+      let s = str.replace(/-/g,"+").replace(/_/g,"/");
+      while(s.length % 4) s += "=";
+      return b64ToBytes(s);
+    }
+
+    function uuid(){
+      if(crypto.randomUUID) return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = Math.random()*16|0;
+        const v = c === "x" ? r : (r&0x3|0x8);
+        return v.toString(16);
+      });
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    function formatBytes(bytes){
+      if(bytes < 1024) return `${bytes} B`;
+      if(bytes < 1024*1024) return `${(bytes/1024).toFixed(1)} KB`;
+      if(bytes < 1024*1024*1024) return `${(bytes/(1024*1024)).toFixed(2)} MB`;
+      return `${(bytes/(1024*1024*1024)).toFixed(2)} GB`;
+    }
+
+    function formatDate(value){
+      try{
+        let d = value?.toDate ? value.toDate() : new Date(value);
+        if(Number.isNaN(d.getTime())) return "Just now";
+        return d.toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
+      }catch{
+        return "Just now";
+      }
+    }
+
+    function setProgress(value, label){
+      const pct = Math.max(0, Math.min(100, Math.round(value)));
+      els.progressWrap.classList.add("active");
+      els.progressBar.style.width = pct + "%";
+      els.progressPercent.textContent = pct + "%";
+      els.progressLabel.textContent = label;
+    }
+
+    function hideProgress(){
+      setTimeout(() => els.progressWrap.classList.remove("active"), 350);
+    }
+
+    function isMobileDevice(){
+      const ua = navigator.userAgent || "";
+      const uaDataMobile = navigator.userAgentData?.mobile;
+      if(typeof uaDataMobile === "boolean") return uaDataMobile;
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(ua);
+    }
+
+    function deviceLabel(){
+      return isMobileDevice() ? "Mobile / Tablet" : "Desktop";
+    }
+
+    // ---------- Persistent pairing ----------
+    function savePairing(){
+      localStorage.setItem(APP_ID + ":pair", JSON.stringify({
+        roomId: state.roomId,
+        secret: bytesToB64Url(state.secret),
+        version: 1
+      }));
+    }
+
+    function loadPairing(){
+      try{
+        const raw = localStorage.getItem(APP_ID + ":pair");
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(!obj.roomId || !obj.secret) return null;
+        return {roomId: obj.roomId, secret: b64UrlToBytes(obj.secret)};
+      }catch{
+        return null;
+      }
+    }
+
+    async function logout(){
+      if(state.unsubscribe){ state.unsubscribe(); state.unsubscribe = null; }
+      await stopScanner();
+      state.roomId = null;
+      state.secret = null;
+      state.key = null;
+      state.items.clear();
+      localStorage.removeItem(APP_ID + ":pair");
+      renderGallery();
+      els.logoutBtn.classList.add("hidden");
+      els.connectionPill.textContent = db ? "Firebase ready" : "Firebase not configured";
+
+      if(isMobileDevice()){
+        showView(els.scannerView);
+        toast("Logged out. Scan a desktop QR to link again.", "good");
+        setTimeout(() => startScanner(), 200);
+      }else{
+        showView(els.pairView);
+        await createDesktopPairing();
+        toast("New Transfer X ID generated.", "good");
+      }
+    }
+
+    // ---------- Crypto ----------
+    async function buildKey(secretBytes){
+      const digest = await crypto.subtle.digest("SHA-256", secretBytes);
+      return crypto.subtle.importKey(
+        "raw", digest,
+        {name:"AES-GCM"},
+        false,
+        ["encrypt","decrypt"]
+      );
+    }
+
+    async function encryptText(text){
+      const iv = randomBytes(12);
+      const encoded = new TextEncoder().encode(text);
+      const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, state.key, encoded);
+      return {iv: bytesToB64(iv), data: bytesToB64(new Uint8Array(encrypted))};
+    }
+
+    async function decryptText(ivB64, dataB64){
+      const iv = b64ToBytes(ivB64);
+      const encrypted = b64ToBytes(dataB64);
+      const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv}, state.key, encrypted);
+      return new TextDecoder().decode(plain);
+    }
+
+    function makePairingString(roomId, secretBytes){
+      // Pairing material is only carried by the QR / manual paste value.
+      const payload = JSON.stringify({
+        v:1,
+        app:"TransferX",
+        room:roomId,
+        key:bytesToB64Url(secretBytes)
+      });
+      return "TX1:" + btoa(unescape(encodeURIComponent(payload)))
+        .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    }
+
+    function parsePairingString(value){
+      try{
+        if(!value || !value.startsWith("TX1:")) throw new Error("Invalid Transfer X code.");
+        const encoded = value.slice(4).replace(/-/g,"+").replace(/_/g,"/");
+        let padded = encoded;
+        while(padded.length % 4) padded += "=";
+        const json = decodeURIComponent(escape(atob(padded)));
+        const payload = JSON.parse(json);
+        if(payload.app !== "TransferX" || payload.v !== 1) throw new Error("Unsupported Transfer X QR.");
+        if(!payload.room || !payload.key) throw new Error("Pairing information is incomplete.");
+        return {roomId:payload.room, secret:b64UrlToBytes(payload.key)};
+      }catch(e){
+        throw new Error(e?.message || "Could not read Transfer X QR.");
+      }
+    }
+
+    // ---------- Firebase ----------
+    let db = null;
+
+    async function initFirebase(){
+      if(!isFirebaseConfigured()){
+        els.connectionPill.textContent = "Firebase not configured";
+        return false;
+      }
+      try{
+        await loadFirebaseModules();
+        const app = initializeApp(FIREBASE_CONFIG);
+        db = getFirestore(app);
+        els.connectionPill.textContent = "Firebase ready";
+        return true;
+      }catch(error){
+        console.error("Firebase initialization failed:", error);
+        els.connectionPill.textContent = "Firebase load error";
+        toast("Firebase could not load. The QR/ID can still be generated.", "bad");
+        return false;
+      }
+    }
+
+    function roomRef(){
+      return doc(db, ROOM_PREFIX, state.roomId);
+    }
+
+    function filesRef(){
+      return collection(db, ROOM_PREFIX, state.roomId, FILES_COLLECTION);
+    }
+
+    async function ensureRoom(){
+      if(!db) throw new Error("Add your Firebase config in FIREBASE_CONFIG first.");
+      await setDoc(roomRef(), {
+        version:1,
+        app:"TransferX",
+        createdAt:serverTimestamp()
+      }, {merge:true});
+    }
+
+    function subscribeFiles(){
+      if(!db || !state.roomId) return;
+      if(state.unsubscribe) state.unsubscribe();
+
+      const q = query(filesRef(), orderBy("createdAt","desc"));
+      state.unsubscribe = onSnapshot(q, snapshot => {
+        const next = new Map();
+
+        snapshot.forEach(snap => {
+          const data = snap.data();
+          next.set(snap.id, {id:snap.id, ...data});
+        });
+
+        state.items = next;
+        renderGallery();
+        els.statusText.textContent = "Secure room connected · Live sync";
+        els.syncLabel.textContent = "LIVE SYNC";
+        els.connectionPill.textContent = "Connected";
+      }, error => {
+        console.error(error);
+        els.statusText.textContent = "Firestore connection error";
+        els.syncLabel.textContent = "SYNC ERROR";
+        els.connectionPill.textContent = "Firestore error";
+        toast("Firestore sync failed. Check your rules/config.", "bad");
+      });
+    }
+
+    async function readEncryptedFile(item){
+      if(!db) throw new Error("Firebase is not configured.");
+      const chunksQuery = query(
+        collection(db, ROOM_PREFIX, state.roomId, FILES_COLLECTION, item.id, "chunks"),
+        orderBy("i","asc")
+      );
+      const snap = await getDocs(chunksQuery);
+      if(snap.empty) throw new Error("No image chunks found.");
+
+      let packed = "";
+      snap.forEach(s => packed += s.data().data);
+
+      const plaintext = await decryptText(item.iv, packed);
+      return {meta: JSON.parse(await decryptText(item.metaIv, item.encryptedMeta)), dataUrl: plaintext};
+    }
+
+    // ---------- Desktop pairing ----------
+    async function renderDesktopQr(){
+      const pairing = makePairingString(state.roomId, state.secret);
+      els.qrCode.innerHTML = `
+        <div style="display:grid;place-items:center;width:224px;height:224px;color:#111;font:600 12px Inter,sans-serif;text-align:center">
+          GENERATING QR…
+        </div>`;
+
+      try{
+        await ensureQrLibrary();
+        els.qrCode.innerHTML = "";
+        new window.QRCode(els.qrCode, {
+          text: pairing,
+          width: 224,
+          height: 224,
+          colorDark: "#061126",
+          colorLight: "#ffffff",
+          correctLevel: window.QRCode.CorrectLevel.M
+        });
+      }catch(error){
+        console.error("QR generation failed:", error);
+        els.qrCode.innerHTML = `
+          <div style="width:224px;height:224px;display:grid;place-items:center;color:#111;background:#fff;padding:20px;text-align:center;font:600 12px Inter,sans-serif">
+            QR LIBRARY COULD NOT LOAD<br><span style="font-weight:500;margin-top:8px">Use a normal HTTPS connection and reload.</span>
+          </div>`;
+        toast("QR generator could not load. Reload the page and try again.", "bad");
+      }
+    }
+
+    async function createDesktopPairing({refreshQr=true}={}){
+      state.roomId = "tx-" + bytesToB64Url(randomBytes(12)).toLowerCase();
+      state.secret = randomBytes(32);
+      state.key = await buildKey(state.secret);
+      savePairing();
+
+      els.roomIdText.textContent = state.roomId;
+      if(refreshQr) await renderDesktopQr();
+
+      els.logoutBtn.classList.remove("hidden");
+
+      // Firebase is optional for the local pairing screen.
+      if(db){
+        await ensureRoom().catch(err => {
+          console.warn("Room initialization failed:", err);
+          toast("Firebase room could not be created. Check your Firestore rules.", "bad");
+        });
+      }
+    }
+
+    async function usePairing(pair){
+      if(!pair?.roomId || !pair?.secret) throw new Error("Invalid Transfer X pairing.");
+      if(state.unsubscribe){ state.unsubscribe(); state.unsubscribe = null; }
+
+      state.roomId = pair.roomId;
+      state.secret = pair.secret;
+      state.key = await buildKey(state.secret);
+      savePairing();
+
+      els.logoutBtn.classList.remove("hidden");
+      els.deviceStat.textContent = "Paired · " + deviceLabel();
+
+      if(db){
+        await ensureRoom();
+        subscribeFiles();
+      }else{
+        els.statusText.textContent = "Paired locally · Add Firebase to sync images";
+        els.syncLabel.textContent = "FIREBASE REQUIRED";
+        els.connectionPill.textContent = "Paired";
+      }
+
+      showView(els.workspaceView);
+      toast(db ? "Device linked successfully." : "Device linked. Add Firebase config to sync images.", "good");
+    }
+
+    // ---------- QR Scanner ----------
+    async function startScanner(){
+      showView(els.scannerView);
+      if(!isMobileDevice()) return;
+
+      try{
+        await ensureScannerLibrary();
+      }catch(error){
+        console.error(error);
+        toast("QR scanner could not load. Reload the page and try again.", "bad");
+        return;
+      }
+
+      await stopScanner();
+      state.scanner = new window.Html5Qrcode("reader");
+
+      const onScan = async (decodedText) => {
+        try{
+          const pair = parsePairingString(decodedText);
+          await stopScanner();
+          await usePairing(pair);
+        }catch(error){
+          toast(error.message, "bad");
+          const reader = byId("reader");
+          reader?.classList.remove("shake");
+          void reader?.offsetWidth;
+          reader?.classList.add("shake");
+        }
+      };
+
+      const onError = () => {};
+
+      try{
+        await state.scanner.start(
+          {facingMode:"environment"},
+          {fps:10,qrbox:{width:260,height:260}},
+          onScan,
+          onError
+        );
+        els.connectionPill.textContent = "Scanner ready";
+      }catch(error){
+        console.error(error);
+        toast("Camera could not start. Check browser camera permission and use HTTPS.", "bad");
+      }
+    }
+
+    async function stopScanner(){
+      if(!state.scanner) return;
+      try{
+        if(state.scanner.isScanning) await state.scanner.stop();
+      }catch{}
+      try{ await state.scanner.clear(); }catch{}
+      state.scanner = null;
+    }
+
+    // ---------- Image conversion ----------
+    async function fileToOptimizedDataUrl(file){
+      if(!file.type.startsWith("image/")) throw new Error(`${file.name} is not an image.`);
+
+      const sourceUrl = URL.createObjectURL(file);
+      try{
+        const img = await new Promise((resolve,reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+          image.src = sourceUrl;
+        });
+
+        const maxDim = 1920;
+        const ratio = Math.min(1, maxDim / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+        const width = Math.max(1, Math.round((img.naturalWidth || img.width) * ratio));
+        const height = Math.max(1, Math.round((img.naturalHeight || img.height) * ratio));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d", {alpha:true});
+        ctx.drawImage(img,0,0,width,height);
+
+        // Preserve PNG when transparency exists; otherwise use JPEG for smaller transfers.
+        let mime = "image/jpeg";
+        if(file.type === "image/png" && !hasOpaqueBackground(img, canvas, ctx)){
+          mime = "image/png";
+        }
+        const quality = mime === "image/jpeg" ? 0.84 : undefined;
+        return canvas.toDataURL(mime, quality);
+      }finally{
+        URL.revokeObjectURL(sourceUrl);
+      }
+    }
+
+    function hasOpaqueBackground(img, canvas, ctx){
+      // Conservative path: don't inspect huge images pixel-by-pixel.
+      if(img.width * img.height > 1600000) return true;
+      try{
+        const sampleW = Math.min(canvas.width, 320);
+        const sampleH = Math.min(canvas.height, 320);
+        const x = ctx.getImageData(0,0,sampleW,sampleH).data;
+        for(let i=3;i<x.length;i+=4){
+          if(x[i] < 250) return false;
+        }
+      }catch{}
+      return true;
+    }
+
+    // ---------- Firestore image upload ----------
+    // Keep every string safely below Firestore's 1 MiB document limit.
+    const CHUNK_SIZE = 450000;
+
+    async function uploadOne(file, index, total){
+      if(!db) throw new Error("Firebase is not configured.");
+      setProgress(((index)/total)*100, `Converting ${file.name}…`);
+
+      const dataUrl = await fileToOptimizedDataUrl(file);
+
+      setProgress(((index+0.18)/total)*100, `Encrypting ${file.name}…`);
+      const encryptedImage = await encryptText(dataUrl);
+
+      const metadata = {
+        name:file.name,
+        mime:file.type || "image/jpeg",
+        originalSize:file.size,
+        transferredAt:Date.now()
+      };
+      const encryptedMeta = await encryptText(JSON.stringify(metadata));
+
+      const packed = encryptedImage.data;
+      const fileId = uuid();
+      const totalChunks = Math.ceil(packed.length / CHUNK_SIZE);
+
+      setProgress(((index+0.28)/total)*100, `Uploading ${file.name} · 0/${totalChunks} chunks…`);
+
+      const fileRef = doc(filesRef(), fileId);
+      await setDoc(fileRef, {
+        encryptedMeta: encryptedMeta.data,
+        metaIv: encryptedMeta.iv,
+        iv: encryptedImage.iv,
+        chunkCount:totalChunks,
+        createdAt:serverTimestamp()
+      });
+
+      for(let i=0;i<totalChunks;i++){
+        const part = packed.slice(i*CHUNK_SIZE, (i+1)*CHUNK_SIZE);
+        await setDoc(
+          doc(collection(db, ROOM_PREFIX, state.roomId, FILES_COLLECTION, fileId, "chunks"), String(i).padStart(6,"0")),
+          {i, data:part}
+        );
+        const progress = ((index + 0.28 + 0.70*((i+1)/totalChunks))/total)*100;
+        setProgress(progress, `Uploading ${file.name} · ${i+1}/${totalChunks} chunks…`);
+      }
+
+      setProgress(((index+1)/total)*100, `Uploaded ${file.name}`);
+      return fileId;
+    }
+
+    async function uploadFiles(files){
+      const list = [...files].filter(f => f.type.startsWith("image/"));
+      if(!list.length){
+        toast("Please choose image files.", "bad");
+        return;
+      }
+
+      try{
+        els.chooseImagesBtn.disabled = true;
+        els.cameraBtn.disabled = true;
+
+        for(let i=0;i<list.length;i++){
+          await uploadOne(list[i], i, list.length);
+        }
+
+        toast(`${list.length} image${list.length>1?"s":""} transferred.`, "good");
+      }catch(error){
+        console.error(error);
+        toast(error?.message || "Upload failed.", "bad");
+        setProgress(0, "Upload failed");
+      }finally{
+        els.chooseImagesBtn.disabled = false;
+        els.cameraBtn.disabled = false;
+        hideProgress();
+      }
+    }
+
+    // ---------- Gallery ----------
+    async function getItemData(item){
+      if(state.items.get(item.id)?._cached) return item._cached;
+      const result = await readEncryptedFile(item);
+      item._cached = result;
+      return result;
+    }
+
+    function renderGallery(){
+      const entries = [...state.items.values()].sort((a,b) => {
+        const aa = a.createdAt?.toMillis?.() || 0;
+        const bb = b.createdAt?.toMillis?.() || 0;
+        return bb - aa;
+      });
+
+      els.imageStat.textContent = `${entries.length} image${entries.length === 1 ? "" : "s"}`;
+      if(!entries.length){
+        els.galleryGrid.innerHTML = `
+          <div class="empty">
+            <div>
+              <strong>No images yet</strong>
+              <span>Upload an image from this device or another paired device. New images will appear here automatically.</span>
+            </div>
+          </div>`;
+        return;
+      }
+
+      els.galleryGrid.innerHTML = entries.map(item => `
+        <article class="image-card" data-file-id="${item.id}" tabindex="0">
+          <div class="image-actions">
+            <button class="icon-btn preview-btn" title="Open image" data-action="preview" data-id="${item.id}">⌕</button>
+            <button class="icon-btn download-btn" title="Download image" data-action="download" data-id="${item.id}">↓</button>
+          </div>
+          <div class="thumb-placeholder" style="width:100%;height:100%;display:grid;place-items:center;color:#6980a5;font-size:11px">Encrypted</div>
+          <div class="shade"></div>
+          <div class="image-meta">
+            <div style="min-width:0"><div class="image-name">${escapeHtml(item._displayName || "Encrypted image")}</div><div class="image-time">${escapeHtml(formatDate(item.createdAt))}</div></div>
+            <div class="image-time">${item.chunkCount || "—"} chunks</div>
+          </div>
+        </article>
+      `).join("");
+
+      // Load thumbnails gradually.
+      entries.forEach(async item => {
+        try{
+          const result = await getItemData(item);
+          item._displayName = result.meta.name;
+          const card = els.galleryGrid.querySelector(`[data-file-id="${CSS.escape(item.id)}"]`);
+          if(!card) return;
+          const img = document.createElement("img");
+          img.src = result.dataUrl;
+          img.alt = result.meta.name;
+          img.loading = "lazy";
+          img.onload = () => {
+            const placeholder = card.querySelector(".thumb-placeholder");
+            if(placeholder) placeholder.replaceWith(img);
+          };
+          if(item._displayName){
+            const name = card.querySelector(".image-name");
+            if(name) name.textContent = item._displayName;
+          }
+        }catch(error){
+          console.warn("Could not decrypt image", item.id, error);
+        }
+      });
+    }
+
+    async function downloadItem(item){
+      try{
+        toast("Preparing image…");
+        const result = await getItemData(item);
+        const filename = result.meta.name || "transfer-x-image.jpg";
+        const blob = await (await fetch(result.dataUrl)).blob();
+
+        // Mobile browsers that support file sharing can hand the image to
+        // the native Photos/Gallery share sheet from the same button.
+        const file = new File([blob], filename, {type: blob.type || result.meta.mime || "image/jpeg"});
+        if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+          await navigator.share({title: filename, files:[file]});
+          toast("Image sent to the device share/save sheet.", "good");
+          return;
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+        toast("Download started.", "good");
+      }catch(error){
+        // A cancelled native share is not an app failure.
+        if(error?.name === "AbortError") return;
+        console.error(error);
+        toast("Could not decrypt/download this image.", "bad");
+      }
+    }
+
+    async function openViewer(item){
+      try{
+        const result = await getItemData(item);
+        state.viewerItem = {...item, ...result};
+        state.viewerScale = 1;
+        els.viewerImage.src = result.dataUrl;
+        els.viewerTitle.textContent = result.meta.name;
+        els.viewerInfo.textContent = `${result.meta.mime || "image"} · ${formatBytes(result.meta.originalSize || 0)} · 100%`;
+        els.viewerModal.classList.add("open");
+        applyViewerScale();
+      }catch(error){
+        console.error(error);
+        toast("Could not open image.", "bad");
+      }
+    }
+
+    function applyViewerScale(){
+      els.viewerImage.style.transform = `scale(${state.viewerScale})`;
+      if(state.viewerItem){
+        els.viewerInfo.textContent = `${state.viewerItem.meta.mime || "image"} · ${formatBytes(state.viewerItem.meta.originalSize || 0)} · ${Math.round(state.viewerScale*100)}%`;
+      }
+    }
+
+    function setZoom(next){
+      state.viewerScale = Math.max(.25, Math.min(5, next));
+      applyViewerScale();
+    }
+
+    // ---------- Events ----------
+    els.chooseImagesBtn.addEventListener("click", () => els.imageInput.click());
+    els.cameraBtn.addEventListener("click", () => els.cameraInput.click());
+    els.imageInput.addEventListener("change", e => uploadFiles(e.target.files));
+    els.cameraInput.addEventListener("change", e => uploadFiles(e.target.files));
+
+    ["dragenter","dragover"].forEach(name => els.dropZone.addEventListener(name, e => {
+      e.preventDefault();
+      els.dropZone.classList.add("drag");
+    }));
+    ["dragleave","drop"].forEach(name => els.dropZone.addEventListener(name, e => {
+      e.preventDefault();
+      els.dropZone.classList.remove("drag");
+    }));
+    els.dropZone.addEventListener("drop", e => uploadFiles(e.dataTransfer.files));
+
+    els.copyIdBtn.addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(state.roomId || "");
+        toast("Transfer X ID copied.", "good");
+      }catch{
+        toast("Copy was blocked by the browser.", "bad");
+      }
+    });
+
+    els.continueDesktopBtn.addEventListener("click", async () => {
+      if(isMobileDevice()) return;
+      if(!state.key) await createDesktopPairing();
+      if(db) subscribeFiles();
+      showView(els.workspaceView);
+      els.deviceStat.textContent = "Paired · Desktop";
+    });
+
+    els.backPairBtn.addEventListener("click", async () => {
+      await stopScanner();
+      if(isMobileDevice()) showView(els.scannerView);
+      else showView(els.pairView);
+    });
+    els.stopScannerBtn.addEventListener("click", async () => {
+      await stopScanner();
+      if(isMobileDevice()) showView(els.scannerView);
+      else showView(els.pairView);
+    });
+
+    els.manualPairBtn.addEventListener("click", async () => {
+      try{
+        const pair = parsePairingString(els.manualPairInput.value.trim());
+        await usePairing(pair);
+      }catch(error){
+        toast(error.message, "bad");
+      }
+    });
+
+    els.pairAnotherBtn.addEventListener("click", async () => {
+      if(isMobileDevice()){
+        await startScanner();
+      }else{
+        await createDesktopPairing();
+        subscribeFiles();
+        showView(els.pairView);
+      }
+    });
+    els.logoutBtn.addEventListener("click", logout);
+
+    els.galleryGrid.addEventListener("click", async e => {
+      const btn = e.target.closest("[data-action]");
+      if(!btn) return;
+      const item = state.items.get(btn.dataset.id);
+      if(!item) return;
+      if(btn.dataset.action === "preview") await openViewer(item);
+      if(btn.dataset.action === "download") await downloadItem(item);
+    });
+
+    els.galleryGrid.addEventListener("keydown", async e => {
+      if(e.key !== "Enter") return;
+      const card = e.target.closest(".image-card");
+      if(!card) return;
+      const item = state.items.get(card.dataset.fileId);
+      if(item) await openViewer(item);
+    });
+
+    els.viewerCloseBtn.addEventListener("click", () => els.viewerModal.classList.remove("open"));
+    els.zoomInBtn.addEventListener("click", () => setZoom(state.viewerScale + .25));
+    els.zoomOutBtn.addEventListener("click", () => setZoom(state.viewerScale - .25));
+    els.zoomResetBtn.addEventListener("click", () => setZoom(1));
+    els.viewerDownloadBtn.addEventListener("click", () => state.viewerItem && downloadItem(state.viewerItem));
+    els.viewerCanvas.addEventListener("wheel", e => {
+      e.preventDefault();
+      setZoom(state.viewerScale + (e.deltaY < 0 ? .15 : -.15));
+    }, {passive:false});
+
+    els.viewerModal.addEventListener("click", e => {
+      if(e.target === els.viewerModal) els.viewerModal.classList.remove("open");
+    });
+
+    // ---------- Startup ----------
+    async function startup(){
+      const mobile = isMobileDevice();
+      document.body.classList.toggle("mobile-mode", mobile);
+      document.body.classList.toggle("desktop-mode", !mobile);
+
+      // Hide desktop-only controls on mobile and vice versa.
+      if(mobile){
+        els.connectionPill.textContent = isFirebaseConfigured() ? "Starting…" : "Firebase not configured";
+        showView(els.scannerView);
+      }else{
+        showView(els.pairView);
+      }
+
+      // Firebase is initialized independently from pairing UI.
+      await initFirebase();
+
+      const stored = loadPairing();
+      if(stored){
+        try{
+          state.roomId = stored.roomId;
+          state.secret = stored.secret;
+          state.key = await buildKey(state.secret);
+          els.deviceStat.textContent = "Paired · " + deviceLabel();
+          els.logoutBtn.classList.remove("hidden");
+
+          if(db){
+            await ensureRoom();
+            subscribeFiles();
+            els.connectionPill.textContent = "Connected";
+          }else{
+            els.connectionPill.textContent = "Paired";
+            els.statusText.textContent = "Paired locally · Add Firebase to sync images";
+            els.syncLabel.textContent = "FIREBASE REQUIRED";
+          }
+
+          showView(els.workspaceView);
+          return;
+        }catch(error){
+          console.warn("Stored pairing could not be restored:", error);
+          localStorage.removeItem(APP_ID + ":pair");
+          state.roomId = null;
+          state.secret = null;
+          state.key = null;
+        }
+      }
+
+      // No stored pairing: DESKTOP creates an ID + QR; MOBILE opens scanner only.
+      if(mobile){
+        els.logoutBtn.classList.add("hidden");
+        els.manualPairInput.value = "";
+        setTimeout(() => startScanner(), 250);
+      }else{
+        await createDesktopPairing({refreshQr:true});
+        els.deviceStat.textContent = "Desktop pairing";
+        els.connectionPill.textContent = db ? "Firebase ready" : "Ready · Add Firebase";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", startup, {once:true});
+  </script>
+</body>
+</html>
